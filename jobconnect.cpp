@@ -189,9 +189,9 @@ void GetworkThread::Run()
 			continue;}
 		if(pwt->putworks.size()>MAXPUTWORK){
 			gwmut.lock();
-			getworks.clear(); // removes all jobs due to slow queue
+			pwt->putworks.clear(); // removes all jobs due to slow queue
 			gwmut.unlock(); 
-			printf("GETWORK: queue full for host[%d]: %s  \n",host,hosts[host].url);
+			printf("GETWORK: queue full for host[%d]: %s; cleared.\n",host,hosts[host].url);
 			threads_sleep(1000);
 			continue;}
 
