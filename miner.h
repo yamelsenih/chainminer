@@ -3,7 +3,7 @@
 #include "handylib.h"
 
 #define NDEBUG
-#define VERSION 2
+#define VERSION 1
 
 //maximum number of chips
 #define MAXCHIPS 384
