@@ -6,11 +6,11 @@
 #define VERSION 2
 
 //maximum number of chips
-#define MAXCHIPS 256
+#define MAXCHIPS 384
 //maximum number of alternative banks
 #define MAXBANKS 4
 //maximum number of chips on alternative bank
-#define BANKCHIPS 64
+#define BANKCHIPS 96
 //maximum number of chips
 #define MAXBOARDS (MAXCHIPS/16)
 //maximum number of wrong nonces a chip can produce in 5 min before downclocking

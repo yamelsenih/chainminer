@@ -382,7 +382,8 @@ int spi_put(hasht mids,datat data,datat* avec,char* chipconf,char* chipfast)
 	spmut.lock();
 	spibufst[spinow]=SPIBUF_READY;
 	spmut.unlock();
-	fixchip=(fixchip+1)%maxchips;
+	if (maxchips!=0)
+		fixchip=(fixchip+1)%maxchips;
 	return 1; // data will be uploaded
 }
 int spi_get(hasht mids,datat data,datat* rvec,char* chipconf)
@@ -498,16 +499,25 @@ int spi_start(char* chipconf,char* chipfast)
 #if (VERSION==1)
 	spi_programm(chipconf,chipfast,0,0,MAXCHIPS);
 #else
-	if(!maxchips){
+	if(!maxchips)
+	{
 		int b=1;
-		for(;b<=MAXBANKS;b++){
+		int last = 0;
+		for(;b<=MAXBANKS;b++)
+		{
 			int c,i=0;
-			for(c=maxchips;c<maxchips+BANKCHIPS && c<MAXCHIPS;c++,i++){
+			for(c=maxchips;c<maxchips+BANKCHIPS && c<MAXCHIPS;c++,i++)
+			{
 				//chipspis[c]=int(1000000.0/(100.0*b+50.0*(i+1)))*1000;}
-				chipspis[c]=625000;}
+				chipspis[c]=625000;
+			}
 			spi_reset(64,b);
-			spi_programm(chipconf,chipfast,b,maxchips,maxchips+BANKCHIPS);}
-		spi_reset(8,0);}
+			spi_programm(chipconf,chipfast,b,maxchips,maxchips+BANKCHIPS);
+			printf("bank %i, chips = %i\n", b, maxchips-last);
+			last = maxchips;
+		}	
+		spi_reset(8,0);
+	}
 #endif
 	memcpy(oldconf,chipconf,MAXCHIPS);
 	memcpy(oldfast,chipfast,MAXCHIPS);
