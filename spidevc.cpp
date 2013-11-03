@@ -513,7 +513,12 @@ int spi_start(char* chipconf,char* chipfast)
 			}
 			spi_reset(64,b);
 			spi_programm(chipconf,chipfast,b,maxchips,maxchips+BANKCHIPS);
-			printf("bank %i, chips = %i\n", b, maxchips-last);
+			int total = maxchips-last;
+			
+			printf("bank %i, chips = %i\n", b, total);
+			if (total%16)
+				printf("    ! Board %i, chip %i is not responding\n", 1+ total/16, 1 + total %16);
+
 			last = maxchips;
 		}	
 		spi_reset(8,0);
