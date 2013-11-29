@@ -129,13 +129,16 @@ void spi_close()
 // Bit-banging reset, to reset more chips in chain - toggle for longer period... Each 3 reset cycles reset first chip in sync chain
 void spi_reset(int max,int bank)
 {
-	const int banks[4]={18,23,24,25}; // GPIO connected to OE of level shifters
+
+                             //     6 5  4  3  2 1 10 9  8  7
+//	const int banks[MAXBANKS]={18,23,24,25,8,7, 4,17,27,22}; // GPIO connected to OE of level shifters
+	const int banks[MAXBANKS]={ 7, 8, 25, 24, 23, 18, 22, 27, 17, 4};
 	int i;
 
 	INP_GPIO(10); OUT_GPIO(10);
 	INP_GPIO(11); OUT_GPIO(11);
 	if(bank){ // does not turn off other banks for bank==0 !!!
-		for(i=0;i<4;i++){
+		for(i=0;i<MAXBANKS;i++){
 			INP_GPIO(banks[i]);
 			OUT_GPIO(banks[i]);
 			if(i+1==bank){
@@ -148,7 +151,7 @@ void spi_reset(int max,int bank)
 		usleep(4096);
 	} // disable bank
 	else{
-		for(i=0;i<4;i++){
+		for(i=0;i<MAXBANKS;i++){
 			INP_GPIO(banks[i]);}}
 	GPIO_SET = 1 << 11; // Set SCK
 	for (i = 0; i < max; i++) { // On standard settings this unoptimized code produces 1 Mhz freq.
@@ -515,9 +518,10 @@ int spi_start(char* chipconf,char* chipfast)
 			spi_programm(chipconf,chipfast,b,maxchips,maxchips+BANKCHIPS);
 			int total = maxchips-last;
 			
-			printf("bank %i, chips = %i\n", b, total);
+			printf("bank %i, chips = %i, boards ok = %i\n", b, total, total/16);
 			if (total%16)
 				printf("    ! Board %i, chip %i is not responding\n", 1+ total/16, 1 + total %16);
+				
 
 			last = maxchips;
 		}	

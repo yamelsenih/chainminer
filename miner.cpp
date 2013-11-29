@@ -379,13 +379,28 @@ void chip_stat(int chips)
 		FILE* fp=fopen(".stat.log","w");
 		
 		int c,j,b=0,lb=0,x,y;
-		const char board[MAXBOARDS+1]="0123456789ABCDEF";
+		static char board[MAXBOARDS+1];//="0123456789ABCDEFGHIJKLMNOPQRSTUVXYZ";
 		int b_speed[MAXBOARDS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		int b_nrate[MAXBOARDS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		int b_hrate[MAXBOARDS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		int b_error[MAXBOARDS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		int b_espi[MAXBOARDS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		int b_miso[MAXBOARDS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+		//printf("sizeof bspeed = %i\n", sizeof(b_speed));
+		unsigned int i;
+		for (i = 0; i < sizeof(board)/sizeof(board[0]) && i < 10; i++)
+			board[i]='0'+i;
+		for (; i < sizeof(board)/sizeof(board[0]); i++)
+			board[i]='a'+i;
+
+		memset(b_speed,0,sizeof(b_speed)/sizeof(b_speed[0]));
+                memset(b_nrate,0,sizeof(b_nrate)/sizeof(b_nrate[0]));
+                memset(b_hrate,0,sizeof(b_hrate)/sizeof(b_hrate[0]));
+                memset(b_error,0,sizeof(b_error)/sizeof(b_error[0]));
+                memset(b_espi,0,sizeof(b_espi)/sizeof(b_espi[0]));
+                memset(b_miso,0,sizeof(b_miso)/sizeof(b_miso[0]));
+
+		
 		for(c=0;c<chips;c++){
 			int good=0,miss=0,badc=0;
 			for(j=0;j<16;j++){
@@ -402,7 +417,7 @@ void chip_stat(int chips)
 			else{
 				if(chipbank[c]!=chipbank[lb]){
 					lb=c;}
-				b=4*(chipbank[lb]-1)+(c-lb)/16;}
+				b=BANKBOARDS*(chipbank[lb]-1)+(c-lb)/BOARDCHIPS;}
 			b_speed[b]+=chipfast[c];
 			b_nrate[b]+=good;
 			b_hrate[b]+=chiphash[c];
