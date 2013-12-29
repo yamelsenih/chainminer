@@ -327,6 +327,7 @@ char conf_chip(char* conf)
 		(conf[4]=='S'?0x10:0x00) |
 		(conf[5]=='O'?0x20:0x00);
 }
+
 void chip_init()
 {	FILE* fp=fopen(".chip.cnf","r");
 	char buf[256],conf[6];
@@ -376,31 +377,17 @@ void chip_stat(int chips)
 	wait=time(NULL)-ctime;
 	if(first || wait>=5*60){
 		float ok,total,nr,hr;
-		FILE* fp=fopen(".stat.log","w");
+		FILE* fp=fopen(".stat1.log","w");
 		
 		int c,j,b=0,lb=0,x,y;
-		static char board[MAXBOARDS+1];//="0123456789ABCDEFGHIJKLMNOPQRSTUVXYZ";
+//		const char board[]="0123456789ABCDEFGHIJKLMNOPQRSTUVXYZ";
 		int b_speed[MAXBOARDS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		int b_nrate[MAXBOARDS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		int b_hrate[MAXBOARDS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		int b_error[MAXBOARDS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		int b_espi[MAXBOARDS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		int b_miso[MAXBOARDS]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-		//printf("sizeof bspeed = %i\n", sizeof(b_speed));
-		unsigned int i;
-		for (i = 0; i < sizeof(board)/sizeof(board[0]) && i < 10; i++)
-			board[i]='0'+i;
-		for (; i < sizeof(board)/sizeof(board[0]); i++)
-			board[i]='a'+i;
-
-		memset(b_speed,0,sizeof(b_speed)/sizeof(b_speed[0]));
-                memset(b_nrate,0,sizeof(b_nrate)/sizeof(b_nrate[0]));
-                memset(b_hrate,0,sizeof(b_hrate)/sizeof(b_hrate[0]));
-                memset(b_error,0,sizeof(b_error)/sizeof(b_error[0]));
-                memset(b_espi,0,sizeof(b_espi)/sizeof(b_espi[0]));
-                memset(b_miso,0,sizeof(b_miso)/sizeof(b_miso[0]));
-
-		
+                int chip_bad = 0, chip_very_slow = 0, chip_slow = 0, chip_ok = 0;
 		for(c=0;c<chips;c++){
 			int good=0,miss=0,badc=0;
 			for(j=0;j<16;j++){
@@ -417,7 +404,7 @@ void chip_stat(int chips)
 			else{
 				if(chipbank[c]!=chipbank[lb]){
 					lb=c;}
-				b=BANKBOARDS*(chipbank[lb]-1)+(c-lb)/BOARDCHIPS;}
+				b=MAXBOARDS/MAXBANKS*(chipbank[lb]-1)+(c-lb)/16;}
 			b_speed[b]+=chipfast[c];
 			b_nrate[b]+=good;
 			b_hrate[b]+=chiphash[c];
@@ -426,12 +413,24 @@ void chip_stat(int chips)
 			b_miso[b]+=chipmiso[c];
 			ok=(double)0xFFFFFFFF/1000000000.0*(double)good/(double)wait;
 			total=(double)0xFFFFFFFF/1000000000.0*(double)chiphash[c]/(double)wait*(double)756/(double)1024;
+
+
+                        if (ok == 0.000)
+                           chip_bad++;
+                        else if (ok < 0.8)
+                           chip_very_slow++;
+                        else if (ok < 1.8)
+                           chip_slow++;
+                        else 
+                           chip_ok++;
+
+
 			for(x=0;x<21;x++){
 				for(y=0;y<36;y++){
 					if(!chipcoor[c][x][y]){ // bad core calculation
 						badc++;}}}
-			fprintf(fp,"%d\t%6.6s\t%d\t%.3f\t%.3f\t%d\t%d\t%d\t%d\t%d\t[%c:%c]\t%d\t",
-				c+1,chip_conf(chipconf[c]),chipfast[c],ok,total,good,miss,chipespi[c],chipmiso[c],chiphash[c],board[b],board[(c-lb)%16],badc);
+			fprintf(fp,"%d\t%6.6s\t%d\t%.3f\t%.3f\t%d\t%d\t%d\t%d\t%d\t[%02d:%02d]\t%d\t",
+				c+1,chip_conf(chipconf[c]),chipfast[c],ok,total,good,miss,chipespi[c],chipmiso[c],chiphash[c],b,(c-lb)%16,badc);
 			for(j=0;j<16;j++){
 				fprintf(fp,"%d ",chipgood[c][j]);}
 			fprintf(fp,"\t");
@@ -450,6 +449,7 @@ void chip_stat(int chips)
 						fprintf(fp,"\tspeed down\n");
 						chipfast[c]--;
 						continue;}
+#if 0
 					if(chipfast[c] && good<=chiphash[c]*0.5){ // set speed to 0
 						chipchange[c]=3;
 						//fprintf(hp,"TUNE chip %d: set speed to 0  \n",c+1);
@@ -468,6 +468,7 @@ void chip_stat(int chips)
 						fprintf(fp,"\tturn off\n");
 						chipconf[c]=0;
 						continue;}
+#endif
 					fprintf(fp,"\n");
 					continue;}
 				if(!miss && ok>total && chipfast[c]<MAXSPEED){
@@ -488,15 +489,55 @@ void chip_stat(int chips)
 			fprintf(fp,"\n");}
 		nr=(double)0xFFFFFFFF/1000000000.0*(double)nrate/(double)wait;
 		hr=(double)0xFFFFFFFF/1000000000.0*(double)hrate/(double)wait*(double)756/(double)1024;
-		fprintf(fp,"speed:%d noncerate[GH/s]:%.3f (%.3f/chip) hashrate[GH/s]:%.3f good:%d errors:%d spi-errors:%d miso-errors:%d jobs:%d (record[GH/s]:%.3f)\n",
-			speed,nr,(nr/chips),hr,nrate,error,espi,miso,job-last,record);
+                int total_chips=chip_bad+chip_very_slow+chip_slow+chip_ok;
+		fprintf(fp,"boards:%d, speed:%d noncerate[GH/s]:%.3f (%.3f/chip) hashrate[GH/s]:%.3f chips:%d (ok:%d,slow:%d,vslow:%d,bad:%d) good:%d errors:%d spi-errors:%d miso-errors:%d jobs:%d (record[GH/s]:%.3f)\n",
+			total_chips/16, speed,nr,(nr/chips),hr,total_chips, chip_ok, chip_slow, chip_very_slow, chip_bad, nrate,error,espi,miso,job-last,record);
 		for(b=0;b<MAXBOARDS;b++){
 			if(b_speed[b]){
-				fprintf(fp,"%c:\t%d\t%.3f\t%.3f\t%d\t%d\t%d\t%d\n",board[b],b_speed[b],
+				fprintf(fp,"%02d:\t%d\t%.3f\t%.3f\t%d\t%d\t%d\t%d\n",b,b_speed[b],
 					(double)0xFFFFFFFF/1000000000.0*(double)b_nrate[b]/(double)wait,
 					(double)0xFFFFFFFF/1000000000.0*(double)b_hrate[b]/(double)wait*(double)756/(double)1024,
 					b_nrate[b],b_error[b],b_espi[b],b_miso[b]);}}
 		fclose(fp);
+                remove(".stat.log");
+                rename(".stat1.log",".stat.log");
+
+                fp=fopen("stat.dat","w");
+		fprintf(fp,
+                          "%d,"      // total chips
+                          "%d,"       // speed
+                          "%.3f,"     // noncerate
+                          "%.3f,"     // speed per chip
+                          "%.3f,"     // hashrate
+                          "%d,"       // total chips
+                          "%d,"       // ok
+                          "%d,"       // slow
+                          "%d,"       // very slow
+                          "%d,"       // bad
+                          "%d,"       // good
+                          "%d,"       // errors
+                          "%d,"       // spi-errors
+                          "%d,"       // miso-errors
+                          "%d,"       // jobs
+                          "%.3f"     // record
+                          "\n",
+                          total_chips/16, 
+                          speed,nr,
+                          (nr/chips),
+                          hr,
+                          total_chips, 
+                          chip_ok, 
+                          chip_slow, 
+                          chip_very_slow, 
+                          chip_bad, 
+                          nrate,
+                          error,
+                          espi,
+                          miso,
+                          job-last,
+                          record);
+		fclose(fp);
+
 
 
 		FILE* fp_json=fopen("stat.json","w");
@@ -510,7 +551,7 @@ void chip_stat(int chips)
 				if (firstboard > 0)
 					fprintf(fp_json,",");
 				fprintf(fp_json,"\n{ ");
-				fprintf(fp_json,"\"slot\": \"%c\", \"speed\": %d, \"noncerate\":%.3f, \"hashrate\": %.3f, \"good\": %d, \"errors\": %d, \"spi-errors\": %d, \"miso-errors\":%d",board[b],b_speed[b],
+				fprintf(fp_json,"\"slot\": \"%02d\", \"speed\": %d, \"noncerate\":%.3f, \"hashrate\": %.3f, \"good\": %d, \"errors\": %d, \"spi-errors\": %d, \"miso-errors\":%d",b,b_speed[b],
 						(double)0xFFFFFFFF/1000000000.0*(double)b_nrate[b]/(double)wait,
 						(double)0xFFFFFFFF/1000000000.0*(double)b_hrate[b]/(double)wait*(double)756/(double)1024,
 						b_nrate[b],b_error[b],b_espi[b],b_miso[b]);

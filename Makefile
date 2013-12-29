@@ -29,7 +29,7 @@ clean:
 json/libjson.a:
 	$(MAKE) -C json
 
-jobconnect.o: jobconnect.cpp miner.h
+jobconnect.o: jobconnect.cpp miner.h proxy_config.h user_config.h
 
 spidevc.o: spidevc.cpp miner.h
 

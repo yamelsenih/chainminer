@@ -12,11 +12,20 @@ using namespace handylib;
 
 //echo -n 'user:pass' | base64
 
+#include "proxy_config.h"
+#include "user_config.h"
+
+//hosts_t hosts[]={
+//              {"Basic dHl0dXMucGkyOnB1YmxpY3Bhc3M=","http://127.0.0.1:8332/",{0,0,0,0,0,0,0,0xFFFFFFFF},NULL,NULL,0,0,0} // local stratum client
+//                      ,{"Basic dHl0dXMucGkyOnB1YmxpY3Bhc3M=","http://127.0.0.1:8333/",{0,0,0,0,0,0,0,0xFFFFFFFF},NULL,NULL,0,0,0} // local stratum client
+//                              ,{"Basic dHl0dXMucGkyOnB1YmxpY3Bhc3M=","http://127.0.0.1:8334/",{0,0,0,0,0,0,0,0xFFFFFFFF},NULL,NULL,0,0,0} // local stratum client
+
 hosts_t hosts[]={
-		{"Basic dHl0dXMucGkyOnB1YmxpY3Bhc3M=","http://127.0.0.1:8332/",{0,0,0,0,0,0,0,0xFFFFFFFF},NULL,NULL,0,0,0} // local stratum client
-			,{"Basic dHl0dXMucGkyOnB1YmxpY3Bhc3M=","http://127.0.0.1:8333/",{0,0,0,0,0,0,0,0xFFFFFFFF},NULL,NULL,0,0,0} // local stratum client
-				,{"Basic dHl0dXMucGkyOnB1YmxpY3Bhc3M=","http://127.0.0.1:8334/",{0,0,0,0,0,0,0,0xFFFFFFFF},NULL,NULL,0,0,0} // local stratum client
-					};
+                {"Basic " USERAUTH, URL1 ,{0,0,0,0,0,0,0,0xFFFFFFFF},NULL,NULL,0,0,0} // local stratum client
+                        ,{"Basic " USERAUTH, URL2 ,{0,0,0,0,0,0,0,0xFFFFFFFF},NULL,NULL,0,0,0} // local stratum client
+                                ,{"Basic " USERAUTH, URL3,{0,0,0,0,0,0,0,0xFFFFFFFF},NULL,NULL,0,0,0} // local stratum client
+                                        };
+
 
 Thread::mutex gwmut;
 Thread::mutex pwmut;
