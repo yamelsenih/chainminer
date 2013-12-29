@@ -6,19 +6,15 @@
 #define VERSION 2
 
 //maximum number of chips
-#define BOARDCHIPS 16
+#define MAXCHIPS 384
 //maximum number of alternative banks
-#define MAXBANKS 10
-//maximum number of boards in a bank
-#define BANKBOARDS 6
+#define MAXBANKS 4
 //maximum number of chips on alternative bank
-#define BANKCHIPS (BOARDCHIPS*BANKBOARDS)
+#define BANKCHIPS 96
 //maximum number of chips
-#define MAXCHIPS (MAXBANKS*BANKCHIPS)
-//maximum number of boards
 #define MAXBOARDS (MAXCHIPS/16)
 //maximum number of wrong nonces a chip can produce in 5 min before downclocking
-#define MAXERROR 5
+#define MAXERROR 10
 //minimum number of correct results in the evaluation period (5 min) to prevent reprogramming
 #define MINGOOD 50
 //delete stored getworks older than this
@@ -32,7 +28,7 @@
 //   55/  101/  115/  93
 //   56/   99/  125/  99
 #define MAXSPEED 57
-#define DEFSPEED 55
+#define DEFSPEED 54
 #define MINSPEED 52
 
 typedef	uint32_t hasht[8];
