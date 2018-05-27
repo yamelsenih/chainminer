@@ -278,21 +278,21 @@ void spi_miner(int chips,char* chipconf,char* chipfast)
 				uint32_t pwdata[32];
 				hasht pwhash;
 				if(chipmids[c][0]==0 && chipdata[c][0]==0){
-					printf("if(chipmids[c][0]==0 && chipdata[c][0]==0)");
+					printf("if(chipmids[c][0]==0 && chipdata[c][0]==0)\n");
 					continue;}
 				if(rvec[c][busy]==0xFFFFFFFF || rvec[c][busy]==0x00000000){ // probably a wrong nonce
 					rvec[c][busy]=ovec[c][busy];
 					spi=1;
-					printf("if(rvec[c][busy]==0xFFFFFFFF || rvec[c][busy]==0x00000000)");
+					printf("if(rvec[c][busy]==0xFFFFFFFF || rvec[c][busy]==0x00000000)\n");
 					continue;}
 				if(rvec[c][busy]==ovec[c][busy]){ // already tested
 					spi=1;
-					printf("if(rvec[c][busy]==ovec[c][busy])");
+					printf("if(rvec[c][busy]==ovec[c][busy])\n");
 					continue;}
 				if(fix_nonce(rvec[c][busy],ovec[c][busy],chipmids[c],chipdata[c],midsdo,datado,change,c,job,busy,pwdata,pwhash)){
 					non++;
 					put_work(pwdata,pwhash);
-					printf("fix_nonce(rvec[c][busy],ovec[c][busy],chipmids[c],chipdata[c],midsdo,datado,change,c,job,busy,pwdata,pwhash))");
+					printf("fix_nonce(rvec[c][busy],ovec[c][busy],chipmids[c],chipdata[c],midsdo,datado,change,c,job,busy,pwdata,pwhash))\n");
 				}
 				else{
 					printf("else");
