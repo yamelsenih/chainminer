@@ -4,7 +4,8 @@
 
 #define NDEBUG
 #define VERSION 2
-
+//quantity of chips
+#define QTYCHIPS 15
 //maximum number of chips
 #define MAXCHIPS 768
 //maximum number of alternative banks
@@ -12,7 +13,7 @@
 //maximum number of chips on alternative bank
 #define BANKCHIPS 192
 //maximum number of chips
-#define MAXBOARDS (MAXCHIPS/16)
+#define MAXBOARDS (MAXCHIPS/QTYCHIPS)
 //maximum number of wrong nonces a chip can produce in 5 min before downclocking
 #define MAXERROR 10
 //minimum number of correct results in the evaluation period (5 min) to prevent reprogramming

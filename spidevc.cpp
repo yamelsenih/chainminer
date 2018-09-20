@@ -481,7 +481,7 @@ void spi_programm(char* chipconf,char* chipfast,int bank,int first, int last)
 		memcpy(buf,spibufrd[spinow]+chipoff[spinow][i],sizeof(buf));
 		chipoff[0][i]=0; // reset offset
 		chipoff[1][i]=0; // reset offset
-		for(j=0;j<16;j++){
+		for(j=0;j<QTYCHIPS;j++){
 			if(buf[j]!=0xFFFFFFFF && buf[j]!=0x00000000){
 				chipbank[i]=bank;
 				maxchips=i+1;
@@ -515,9 +515,9 @@ int spi_start(char* chipconf,char* chipfast)
 			spi_programm(chipconf,chipfast,b,maxchips,maxchips+BANKCHIPS);
 			int total = maxchips-last;
 			
-			printf("bank %i, chips = %i, boards ok = %i\n", b, total, total/16);
-			if (total%16)
-				printf("    ! Board %i, chip %i is not responding\n", 1+ total/16, 1 + total %16);
+			printf("bank %i, chips = %i, boards ok = %i\n", b, total, total/QTYCHIPS);
+			if (total%QTYCHIPS)
+				printf("    ! Board %i, chip %i is not responding\n", 1+ total/QTYCHIPS, 1 + total %QTYCHIPS);
 				
 
 			last = maxchips;

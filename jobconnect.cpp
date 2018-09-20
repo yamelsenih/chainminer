@@ -265,11 +265,12 @@ uint32_t get_work(uint32_t *midstate, uint32_t *data)
 			memcpy(data,gwt->getworks.back().data,sizeof(gw.data));
 			memcpy(midstate,gwt->getworks.back().midstate,sizeof(gw.midstate));
 			//add host signature to data
-			/*if(((char*)data)[0]!=0){
+			if(((char*)data)[0]!=0){
 				printf("ERROR: got incompatible data header char: %d\n",(int)(((char*)data)[0]));
 				gwt->getworks.pop_back();
        				gwmut.unlock();
-				return 0;}*/
+				return 0;
+			}
 			memcpy(data,&host,1);
 			gwt->getworks.pop_back();
        			gwmut.unlock();
